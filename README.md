@@ -9,3 +9,7 @@ To run, simply type:
 ```
 python optimizer.py
 ```
+
+## Bugs
+
+In cases where the function is not convex, or there are multiple local minima, the optimizer converges to an incorrect result. This will be fixed in future versions.

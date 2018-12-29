@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.optimize as spo
 
+symbols = ['SPY', 'AAPL', "GOOG", "IBM", "GS"] #Stocks in the simulated portfolio; SPY is included as a benchmark for the market
 
 def add(frame, symbol):
     temp = pd.read_csv(symbol.lower()+'.csv', usecols=['Date', 'Close'], index_col='Date', na_values=['nan'], parse_dates=True) #read the stock data into the dataframe
@@ -17,13 +18,13 @@ def add(frame, symbol):
 def total(frame, distribution):
     frame *= distribution
     sum = frame.sum(axis=1)
-    sum /= sum.ix[0]
+    sum /= sum.iloc[0]
     sum = pd.DataFrame(sum, columns=['Portfolio'])
     return sum
 
 def neg_sharpe(distribution, frame): #since I'm using a minimizer later, I'm multiplying the ratio by negative 1 since a greater ratio is desired
     sum = total(frame, distribution)
-    returns = sum.ix[-1] - sum.ix[0]
+    returns = sum.iloc[-1] - sum.iloc[0]
     std = sum.std()
     sharpe = -1*returns/std
     return sharpe
@@ -48,7 +49,6 @@ def main():
     dates = pd.date_range(start_date, end_date)
     frame = pd.DataFrame(index=dates)
 
-    symbols = ['SPY', 'AAPL', "GOOG", "IBM", "GS"] #Stocks in the simulated portfolio; SPY is included as a benchmark for the market
 
     for symbol in symbols:
         frame = add(frame, symbol)
@@ -56,7 +56,7 @@ def main():
 
     #create separate dataframes for benchmark and portfolio
     spy_frame = frame['SPY']
-    spy_frame = spy_frame/spy_frame.ix[0] #Normmalize by dividing by first element so only growth is measured
+    spy_frame = spy_frame/spy_frame.iloc[0] #Normmalize by dividing by first element so only growth is measured
     ax = spy_frame.plot(legend=True)
 
 
@@ -70,7 +70,7 @@ def main():
     print("Initial Guess: ", initial)
     print("Initial Sharpe: ", -1*neg_sharpe(initial,frame)[0])
     total_frame = total(frame, initial)
-    initial_returns = (total_frame.ix[-1] - total_frame.ix[0]) * 100
+    initial_returns = (total_frame.iloc[-1] - total_frame.iloc[0]) * 100
     print("Initial Return: ", initial_returns[0], "%")
     print()
 
@@ -98,7 +98,7 @@ def main():
 
     print("Final Sharpe: ", -1 * neg_sharpe(coefs, frame)[0])
     total_frame = total(frame, coefs)
-    final_returns = (total_frame.ix[-1] - total_frame.ix[0]) * 100
+    final_returns = (total_frame.iloc[-1] - total_frame.iloc[0]) * 100
     print("Optimal Return: ", final_returns[0], "%")
 
     plt.show()
